@@ -7,7 +7,7 @@ use App\Entity\Template;
 
 class TemplateManager
 {
-    public function getTemplateComputed(Template $tpl, array $data)
+    public function getTemplateComputed(Template $tpl, array $data): Template
     {
         if (!$tpl) {
             throw new \RuntimeException('no tpl given');
@@ -20,7 +20,7 @@ class TemplateManager
         return $replaced;
     }
 
-    private function computeSubject($text, array $data)
+    private function computeSubject(string $text, array $data): string
     {
         if (strpos($text, '[lesson:instructor_name]') !== false) {
             $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
@@ -30,7 +30,7 @@ class TemplateManager
         return $text;
     }
 
-    private function computeContent($text, array $data)
+    private function computeContent(string $text, array $data): string
     {
         $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
 

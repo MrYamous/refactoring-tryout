@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App;
-
 
 use App\Context\ApplicationContext;
 use App\Entity\Learner;
@@ -20,7 +18,7 @@ class TemplatePlaceholderResolver
         return str_replace('[lesson:instructor_name]', $instructorOfLesson->firstname, $text);
     }
 
-    public static function resolveLessonInstructorLink(string $text, Lesson $lesson)
+    public static function resolveLessonInstructorLink(string $text, Lesson $lesson): string
     {
         $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
         return str_replace('[instructor_link]', 'instructors/' . $instructorOfLesson->id . '-' . urlencode($instructorOfLesson->firstname), $text);
@@ -47,13 +45,13 @@ class TemplatePlaceholderResolver
         return str_replace('[lesson:meeting_point]', $meetingPoint->name, $text);
     }
 
-    public static function resolveLessonSummary(string $text, Lesson $lesson)
+    public static function resolveLessonSummary(string $text, Lesson $lesson): string
     {
         $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
         return $text = str_replace('[lesson:summary]', Lesson::renderText($lessonFromRepository), $text);
     }
 
-    public static function resolveLessonSummaryHtml(string $text, Lesson $lesson)
+    public static function resolveLessonSummaryHtml(string $text, Lesson $lesson): string
     {
         $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
         return str_replace('[lesson:summary_html]', Lesson::renderHtml($lessonFromRepository), $text);
