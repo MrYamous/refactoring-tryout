@@ -19,22 +19,60 @@ class TemplateManager
         }
 
         $replaced = clone($tpl);
-        $replaced->subject = $this->computeText($replaced->subject, $data);
-        $replaced->content = $this->computeText($replaced->content, $data);
+        $replaced->subject = $this->computeSubject($replaced->subject, $data);
+        $replaced->content = $this->computeContent($replaced->content, $data);
 
         return $replaced;
     }
 
-    private function computeText($text, array $data)
+    private function computeSubject($text, array $data)
+    {
+        $lesson = (isset($data['lesson']) and $data['lesson'] instanceof Lesson) ? $data['lesson'] : null;
+        $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
+        (strpos($text, '[lesson:instructor_name]') !== false) and $text = str_replace('[lesson:instructor_name]',$instructorOfLesson->firstname,$text);
+
+        return $text;
+    }
+
+    private function computeContent($text, array $data)
     {
         $applicationContext = ApplicationContext::getInstance();
+        $lesson = (isset($data['lesson']) and $data['lesson'] instanceof Lesson) ? $data['lesson'] : null;
+        $learner  = (isset($data['user']) and ($data['user'] instanceof Learner)) ? $data['user'] : $applicationContext->getCurrentUser();
+        $usefulObject = MeetingPointRepository::getInstance()->getById($lesson->meetingPointId);
+        $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
+
+        if($learner) {
+            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(strtolower($learner->firstname)), $text);
+        }
+
+        if(strpos($text, '[lesson:start_date]') !== false)
+            $text = str_replace('[lesson:start_date]', $lesson->startTime->format('d/m/Y'), $text);
+
+        if(strpos($text, '[lesson:start_time]') !== false)
+            $text = str_replace('[lesson:start_time]', $lesson->startTime->format('H:i'), $text);
+
+        if(strpos($text, '[lesson:end_time]') !== false)
+            $text = str_replace('[lesson:end_time]', $lesson->endTime->format('H:i'), $text);
+
+        if ($lesson->meetingPointId) {
+            if(strpos($text, '[lesson:meeting_point]') !== false)
+                $text = str_replace('[lesson:meeting_point]', $usefulObject->name, $text);
+        }
+
+        (strpos($text, '[lesson:instructor_name]') !== false) and $text = str_replace('[lesson:instructor_name]',$instructorOfLesson->firstname,$text);
+
+        return $text;
+    }
+
+    private function computeText($text, array $data)
+    {
 
         $lesson = (isset($data['lesson']) and $data['lesson'] instanceof Lesson) ? $data['lesson'] : null;
 
         if ($lesson)
         {
             $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
-            $usefulObject = MeetingPointRepository::getInstance()->getById($lesson->meetingPointId);
             $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
 
             if(strpos($text, '[lesson:instructor_link]') !== false){
@@ -58,38 +96,12 @@ class TemplateManager
                         Lesson::renderText($lessonFromRepository),
                         $text
                     );}}
-
-            (strpos($text, '[lesson:instructor_name]') !== false) and $text = str_replace('[lesson:instructor_name]',$instructorOfLesson->firstname,$text);
         }
-
-        if ($lesson->meetingPointId) {
-            if(strpos($text, '[lesson:meeting_point]') !== false)
-                $text = str_replace('[lesson:meeting_point]', $usefulObject->name, $text);
-        }
-
-        if(strpos($text, '[lesson:start_date]') !== false)
-            $text = str_replace('[lesson:start_date]', $lesson->startTime->format('d/m/Y'), $text);
-
-        if(strpos($text, '[lesson:start_time]') !== false)
-            $text = str_replace('[lesson:start_time]', $lesson->startTime->format('H:i'), $text);
-
-        if(strpos($text, '[lesson:end_time]') !== false)
-            $text = str_replace('[lesson:end_time]', $lesson->endTime->format('H:i'), $text);
-
 
             if (isset($data['instructor'])  and ($data['instructor']  instanceof Instructor))
                 $text = str_replace('[instructor_link]',  'instructors/' . $data['instructor']->id .'-'.urlencode($data['instructor']->firstname), $text);
             else
                 $text = str_replace('[instructor_link]', '', $text);
-
-        /*
-         * USER
-         * [user:*]
-         */
-        $learner  = (isset($data['user'])  and ($data['user']  instanceof Learner))  ? $data['user']  : $applicationContext->getCurrentUser();
-        if($learner) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(strtolower($learner->firstname)), $text);
-        }
 
         return $text;
     }
