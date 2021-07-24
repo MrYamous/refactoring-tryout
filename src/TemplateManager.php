@@ -27,13 +27,13 @@ class TemplateManager
 
     private function computeText($text, array $data)
     {
-        $APPLICATION_CONTEXT = ApplicationContext::getInstance();
+        $applicationContext = ApplicationContext::getInstance();
 
         $lesson = (isset($data['lesson']) and $data['lesson'] instanceof Lesson) ? $data['lesson'] : null;
 
         if ($lesson)
         {
-            $_lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
+            $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
             $usefulObject = MeetingPointRepository::getInstance()->getById($lesson->meetingPointId);
             $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
 
@@ -48,14 +48,14 @@ class TemplateManager
                 if ($containsSummaryHtml !== false) {
                     $text = str_replace(
                         '[lesson:summary_html]',
-                        Lesson::renderHtml($_lessonFromRepository),
+                        Lesson::renderHtml($lessonFromRepository),
                         $text
                     );
                 }
                 if ($containsSummary !== false) {
                     $text = str_replace(
                         '[lesson:summary]',
-                        Lesson::renderText($_lessonFromRepository),
+                        Lesson::renderText($lessonFromRepository),
                         $text
                     );}}
 
@@ -68,13 +68,13 @@ class TemplateManager
         }
 
         if(strpos($text, '[lesson:start_date]') !== false)
-            $text = str_replace('[lesson:start_date]', $lesson->start_time->format('d/m/Y'), $text);
+            $text = str_replace('[lesson:start_date]', $lesson->startTime->format('d/m/Y'), $text);
 
         if(strpos($text, '[lesson:start_time]') !== false)
-            $text = str_replace('[lesson:start_time]', $lesson->start_time->format('H:i'), $text);
+            $text = str_replace('[lesson:start_time]', $lesson->startTime->format('H:i'), $text);
 
         if(strpos($text, '[lesson:end_time]') !== false)
-            $text = str_replace('[lesson:end_time]', $lesson->end_time->format('H:i'), $text);
+            $text = str_replace('[lesson:end_time]', $lesson->endTime->format('H:i'), $text);
 
 
             if (isset($data['instructor'])  and ($data['instructor']  instanceof Instructor))
@@ -86,9 +86,9 @@ class TemplateManager
          * USER
          * [user:*]
          */
-        $_user  = (isset($data['user'])  and ($data['user']  instanceof Learner))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-        if($_user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(strtolower($_user->firstname)), $text);
+        $learner  = (isset($data['user'])  and ($data['user']  instanceof Learner))  ? $data['user']  : $applicationContext->getCurrentUser();
+        if($learner) {
+            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(strtolower($learner->firstname)), $text);
         }
 
         return $text;

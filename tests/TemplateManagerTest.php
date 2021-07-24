@@ -42,10 +42,10 @@ class TemplateManagerTest extends \PHPUnit_Framework_TestCase
         $expectedInstructor = InstructorRepository::getInstance()->getById(1);
         $expectedMeetingPoint = MeetingPointRepository::getInstance()->getById(1);
         $expectedUser = ApplicationContext::getInstance()->getCurrentUser();
-        $start_at = new \DateTime("2021-01-01 12:00:00");
-        $end_at = $start_at->add(new \DateInterval('PT1H'));
+        $startTime = new \DateTime("2021-01-01 12:00:00");
+        $endTime = $startTime->add(new \DateInterval('PT1H'));
 
-        $lesson = new Lesson(1, 1 , 1, $start_at, $end_at);
+        $lesson = new Lesson(1, 1 , 1, $startTime, $endTime);
         LessonRepository::getInstance()->save($lesson);
 
         $template = new Template(
@@ -74,7 +74,7 @@ L'équipe Ornikar
         $this->assertEquals("
 Bonjour Toto,
 
-La reservation du " . $start_at->format('d/m/Y') . " de " . $start_at->format('H:i') . " à " . $end_at->format('H:i') . " avec " . $expectedInstructor->firstname . " a bien été prise en compte!
+La reservation du " . $startTime->format('d/m/Y') . " de " . $startTime->format('H:i') . " à " . $endTime->format('H:i') . " avec " . $expectedInstructor->firstname . " a bien été prise en compte!
 Voici votre point de rendez-vous: " . $expectedMeetingPoint->name . ".
 
 Bien cordialement,
