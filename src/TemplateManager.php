@@ -7,12 +7,15 @@ use App\Entity\Template;
 
 class TemplateManager
 {
+    private TemplatePlaceholderResolver $templatePlaceholderResolver;
+
+    public function __construct(TemplatePlaceholderResolver $templatePlaceholderResolver)
+    {
+        $this->templatePlaceholderResolver = $templatePlaceholderResolver;
+    }
+
     public function getTemplateComputed(Template $tpl, array $data): Template
     {
-        if (!$tpl) {
-            throw new \RuntimeException('no tpl given');
-        }
-
         $replaced = clone($tpl);
         $replaced->subject = $this->computeSubject($replaced->subject, $data);
         $replaced->content = $this->computeContent($replaced->content, $data);
@@ -22,40 +25,20 @@ class TemplateManager
 
     private function computeSubject(string $text, array $data): string
     {
-        if (strpos($text, '[lesson:instructor_name]') !== false) {
-            $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
-            $text = TemplatePlaceholderResolver::resolveLessonInstructorName($text, $lesson);
-        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
+        $text = $this->templatePlaceholderResolver->resolveLessonInstructorName($text, $lesson);
 
         return $text;
     }
 
     private function computeContent(string $text, array $data): string
     {
-        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
+        $placeholderResolvers = [];
 
-        if (false !== strpos($text, '[user:first_name]')) {
-            $text = TemplatePlaceholderResolver::resolveUserFirstname($text, $data);
-        }
-
-        if (false !== strpos($text, '[lesson:start_date]')) {
-            $text = TemplatePlaceholderResolver::resolveLessonStartDate($text, $lesson);
-        }
-
-        if (false !== strpos($text, '[lesson:start_time]')) {
-            $text = TemplatePlaceholderResolver::resolveLessonStartTime($text, $lesson);
-        }
-
-        if (false !== strpos($text, '[lesson:end_time]')) {
-            $text = TemplatePlaceholderResolver::resolveLessonEndTime($text, $lesson);
-        }
-
-        if (false !== strpos($text, '[lesson:meeting_point]')) {
-            $text = TemplatePlaceholderResolver::resolveLessonMeetingPoint($text, $lesson);
-        }
-
-        if (false !== strpos($text, '[lesson:instructor_name]')) {
-            $text = TemplatePlaceholderResolver::resolveLessonInstructorName($text, $lesson);
+        foreach ($placeholderResolvers as $placeholderResolver) {
+            if ($placeholderResolver->canResolve($text)) {
+                $text = $placeholderResolver->resolvePlaceholder($text, $data);
+            }
         }
 
         return $text;

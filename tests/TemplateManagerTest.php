@@ -72,7 +72,7 @@ L'équipe Ornikar
 
         $this->assertEquals('Votre leçon de conduite avec ' . $expectedInstructor->firstname, $message->subject);
         $this->assertEquals("
-Bonjour Toto,
+Bonjour " . $expectedUser->firstname . " ,
 
 La reservation du " . $startTime->format('d/m/Y') . " de " . $startTime->format('H:i') . " à " . $endTime->format('H:i') . " avec " . $expectedInstructor->firstname . " a bien été prise en compte!
 Voici votre point de rendez-vous: " . $expectedMeetingPoint->name . ".

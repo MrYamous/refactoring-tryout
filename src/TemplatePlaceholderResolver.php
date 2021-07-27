@@ -12,47 +12,79 @@ use App\Repository\MeetingPointRepository;
 class TemplatePlaceholderResolver
 {
 
-    public static function resolveLessonInstructorName(string $text, Lesson $lesson): string
+    public function resolveLessonInstructorName(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:instructor_name]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
         return str_replace('[lesson:instructor_name]', $instructorOfLesson->firstname, $text);
     }
 
-    public static function resolveLessonInstructorLink(string $text, Lesson $lesson): string
+    public function resolveLessonInstructorLink(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:instructor_link]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         $instructorOfLesson = InstructorRepository::getInstance()->getById($lesson->instructorId);
         return str_replace('[instructor_link]', 'instructors/' . $instructorOfLesson->id . '-' . urlencode($instructorOfLesson->firstname), $text);
     }
 
-    public static function resolveLessonStartDate(string $text, Lesson $lesson): string
+    public function resolveLessonStartDate(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:start_date]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         return str_replace('[lesson:start_date]', $lesson->startTime->format('d/m/Y'), $text);
     }
 
-    public static function resolveLessonStartTime(string $text, Lesson $lesson): string
+    public function resolveLessonStartTime(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:start_time]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         return str_replace('[lesson:start_time]', $lesson->startTime->format('H:i'), $text);
     }
 
-    public static function resolveLessonEndTime(string $text, Lesson $lesson): string
+    public function resolveLessonEndTime(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:end_time]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         return str_replace('[lesson:end_time]', $lesson->endTime->format('H:i'), $text);
     }
 
-    public static function resolveLessonMeetingPoint(string $text, Lesson $lesson): string
+    public function resolveLessonMeetingPoint(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:meeting_point]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         $meetingPoint = MeetingPointRepository::getInstance()->getById($lesson->meetingPointId);
         return str_replace('[lesson:meeting_point]', $meetingPoint->name, $text);
     }
 
-    public static function resolveLessonSummary(string $text, Lesson $lesson): string
+    public function resolveLessonSummary(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:summary]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
         return $text = str_replace('[lesson:summary]', Lesson::renderText($lessonFromRepository), $text);
     }
 
-    public static function resolveLessonSummaryHtml(string $text, Lesson $lesson): string
+    public function resolveLessonSummaryHtml(string $text, array $data): string
     {
+        if (false === strpos($text, '[lesson:summary_html]')) {
+            return $text;
+        }
+        $lesson = (isset($data['lesson']) and ($data['lesson'] instanceof Lesson)) ? $data['lesson'] : null;
         $lessonFromRepository = LessonRepository::getInstance()->getById($lesson->id);
         return str_replace('[lesson:summary_html]', Lesson::renderHtml($lessonFromRepository), $text);
     }
